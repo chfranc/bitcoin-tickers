@@ -1,6 +1,20 @@
 # bitcoin-tickers
 
-Small, reliable flow to pull Bitcoin market data from the [Massive REST API](https://massive.com/docs/rest/quickstart), validate it, and store it as CSV.
+Bitcoin market data flows built on the [Massive REST API](https://massive.com/docs/rest/quickstart):
+
+1. **`btc_tickers.py`** — pulls daily BTC OHLCV bars, validates them, stores CSV.
+2. **Live dashboard** ([site](https://chfranc.github.io/bitcoin-tickers/)) — BTC/USD price and chart plus Bitcoin-native companies (Strategy, miners, treasuries): price, market cap, BTC holdings, BTC NAV and mNAV. Static site in `docs/`, data refreshed by `fetch_data.py`.
+
+## Dashboard
+
+```bash
+export MASSIVE_API_KEY=your_key
+python fetch_data.py        # rebuilds docs/data.json (~3 min, free-tier paced)
+```
+
+BTC holdings per company are not market data — they live in `companies.json` (approximate, from public filings) and are updated manually. mNAV = market cap ÷ (BTC held × BTC price).
+
+## CSV fetcher
 
 ## What it does
 
