@@ -238,11 +238,28 @@ fetch("data.json")
     $("#asof").textContent = "as of " + (data.holdings_as_of || "—");
 
     $("#btc-price").textContent = fmtUsd(data.btc.price);
-    $("#btc-chips").innerHTML =
-      `<span class="chip">1D ${fmtPct(data.btc.change1d)}</span>` +
-      `<span class="chip">30D ${fmtPct(data.btc.change30d)}</span>` +
-      `<span class="chip">90-day range shown below</span>`;
+    const renderChips = (liveNote) => {
+      $("#btc-chips").innerHTML =
+        (liveNote || `<span class="chip">last close ${data.btc.bars[data.btc.bars.length-1][0]}</span>`) +
+        `<span class="chip">1D ${fmtPct(data.btc.change1d)}</span>` +
+        `<span class="chip">30D ${fmtPct(data.btc.change30d)}</span>`;
+    };
+    renderChips();
     drawBtcChart(data.btc.bars);
+
+    const liveBtc = () => fetch("https://api.kraken.com/0/public/Ticker?pair=XBTUSD")
+      .then(r => r.json())
+      .then(k => {
+        const t = k.result[Object.keys(k.result)[0]];
+        const live = +t.c[0];
+        $("#btc-price").textContent = fmtUsd(live);
+        const vs = (live / data.btc.price - 1) * 100;
+        renderChips(`<span class="chip"><b style="color:var(--up)">● LIVE</b> Kraken</span>` +
+                    `<span class="chip">vs last close ${fmtPct(vs)}</span>`);
+      })
+      .catch(() => {});  // keep EOD price if Kraken is unreachable
+    liveBtc();
+    setInterval(liveBtc, 60000);
 
     const cos = data.companies.slice().sort((a, b) => (b.btc_holdings || 0) - (a.btc_holdings || 0));
     const totBtc = cos.reduce((s, c) => s + (c.btc_holdings || 0), 0);
