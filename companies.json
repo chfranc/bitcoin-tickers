@@ -1,13 +1,13 @@
 {
   "_note": "BTC holdings are approximate, sourced from public filings/bitcointreasuries. Update manually — Massive does not provide holdings data.",
-  "_as_of": "2026-01",
+  "_as_of": "2026-07",
   "companies": [
-    { "ticker": "MSTR", "name": "Strategy", "btc_holdings": 650000 },
-    { "ticker": "XXI", "name": "Twenty One Capital", "btc_holdings": 43500 },
-    { "ticker": "MARA", "name": "MARA Holdings", "btc_holdings": 53000 },
-    { "ticker": "RIOT", "name": "Riot Platforms", "btc_holdings": 19200 },
-    { "ticker": "CLSK", "name": "CleanSpark", "btc_holdings": 13000 },
-    { "ticker": "HUT", "name": "Hut 8", "btc_holdings": 10600 },
-    { "ticker": "COIN", "name": "Coinbase", "btc_holdings": 11800 }
+    { "ticker": "MSTR", "name": "Strategy", "btc_holdings": 843775 },
+    { "ticker": "XXI", "name": "Twenty One Capital", "btc_holdings": 43514 },
+    { "ticker": "MARA", "name": "MARA Holdings", "btc_holdings": 36303 },
+    { "ticker": "RIOT", "name": "Riot Platforms", "btc_holdings": 15680 },
+    { "ticker": "CLSK", "name": "CleanSpark", "btc_holdings": 13924 },
+    { "ticker": "HUT", "name": "Hut 8", "btc_holdings": 13696 },
+    { "ticker": "COIN", "name": "Coinbase", "btc_holdings": 16492 }
   ]
 }
