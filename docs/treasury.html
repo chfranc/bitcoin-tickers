@@ -45,25 +45,36 @@
   details.how .body .k { color: var(--ink); font-weight: 500; }
   details.how a { color: var(--ink-2); }
 
-  .rails { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 10px; }
-  .rail { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .rails { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(480px, 100%), 1fr)); gap: 12px; }
+  .rail { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
   .rail-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .rail-name { font-size: 13px; font-weight: 500; color: var(--ink-2); }
-  .status { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; white-space: nowrap; }
-  .status .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .rail-name { font-size: 14px; font-weight: 500; color: var(--ink-2); }
+  .status { font-size: 12px; font-weight: 500; letter-spacing: 0.04em; white-space: nowrap; }
+  .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0px; }
   .status.OK { color: var(--ink-3); } .status.OK .dot { background: var(--ok); }
   .status.LOW { color: var(--danger); } .status.LOW .dot { background: var(--danger); }
   .status.EXCESS { color: var(--warn); } .status.EXCESS .dot { background: var(--warn); }
-  .rail-bal { font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px; }
-  .rail-usd { font-size: 12px; color: var(--ink-3); font-weight: 400; }
-  .bar { position: relative; height: 4px; background: var(--border); border-radius: 99px; margin: 14px 0 6px; }
+  .rail-bal { font-size: 26px; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 6px; }
+  .rail-usd { font-size: 13px; color: var(--ink-3); font-weight: 400; }
+  .situation { font-size: 12.5px; margin-top: 2px; color: var(--ink-2); }
+  .situation.LOW { color: var(--danger); }
+  .situation.EXCESS { color: var(--warn); }
+  .bar { position: relative; height: 8px; background: var(--border); border-radius: 99px; margin: 16px 0 6px; }
   .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; background: var(--ink-3); }
   .s-LOW .bar-fill { background: var(--danger); }
   .s-EXCESS .bar-fill { background: var(--warn); }
-  .mark { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--ink-3); }
+  .s-OK .bar-fill { background: var(--ok); opacity: .75; }
+  .mark { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink-3); border-radius: 1px; }
   .mark.target { background: var(--brand); }
-  .bar-labels { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-  .src-tag { font-size: 10.5px; color: var(--ink-3); }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .src-tag { font-size: 11px; color: var(--ink-3); }
+
+  .selfhost { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; font-size: 13px; color: var(--ink-2); }
+  .selfhost p { margin-bottom: 10px; max-width: 780px; }
+  .selfhost b { color: var(--ink); font-weight: 600; }
+  .selfhost pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; color: var(--ink); overflow-x: auto; margin: 10px 0; }
+  .selfhost pre .c { color: var(--ink-3); }
+  .selfhost a { color: var(--ink); }
   .cfg-link { font-size: 11px; color: var(--ink-3); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
   .cfg-link:hover { color: var(--ink-2); }
   .cfg { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; display: grid; gap: 10px; }
@@ -156,6 +167,25 @@
   <section><h2>Rails</h2><div class="rails" id="rails"></div></section>
   <section><h2>Proposed rebalances</h2><div class="cards" id="proposals"></div></section>
   <section><h2>Escalations</h2><div class="cards" id="escalations"></div></section>
+
+  <section><h2>Run it with your own accounts</h2>
+    <div class="selfhost">
+      <p>Everything on this page runs in your browser: the demo, on-chain watch addresses and manual
+      balances need no download and no credentials. To connect <b>private exchange accounts</b>
+      (Kraken, Binance) you run the open-source version on your own machine, so API keys never touch
+      a public website:</p>
+      <pre>git clone https://github.com/chfranc/liquidity-monitor
+cd liquidity-monitor
+pip install flask requests
+python3 app.py   <span class="c"># → http://localhost:8641</span></pre>
+      <p>Then open any rail's <b>configure</b> panel, pick the source (Kraken / Binance) and paste your
+      API keys there. They are stored in a local <b>.env</b> file on your machine, never displayed back
+      and never logged. Create the keys as <b>read-only</b> — query permissions only, no trading, no
+      withdrawals: the tool reads balances and proposes; it cannot move funds.</p>
+      <p>Rails, thresholds and transfer corridors are yours to define — from the same configure panels
+      or in <b>config.json</b>. Full docs: <a href="https://github.com/chfranc/liquidity-monitor">github.com/chfranc/liquidity-monitor</a> (MIT).</p>
+    </div>
+  </section>
   <section><h2>Audit log</h2><div class="table-scroll"><table>
     <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Detail</th></tr></thead>
     <tbody id="audit"></tbody>
@@ -457,17 +487,24 @@ function render() {
     const prov = si.ok
       ? `${SRC_LABEL[type] || type}${si.ts ? " · " + si.ts : ""}`
       : `<span style="color:var(--danger)" title="${(si.error || "").replace(/"/g, "'")}">${SRC_LABEL[type] || type} · error</span>`;
+    const situation = st === "LOW"
+      ? `${fmtMoney(r.min - r.balance, r.currency)} below minimum — ${fmtMoney(r.target - r.balance, r.currency)} to reach target`
+      : st === "EXCESS"
+      ? `${fmtMoney(r.balance - r.max, r.currency)} above maximum — overexposed to this counterparty`
+      : `within policy — at ${Math.round(r.balance / r.target * 100)}% of target`;
+    const zones = `linear-gradient(90deg, rgba(229,100,110,.16) 0 ${pc(r.min)}, transparent ${pc(r.min)} ${pc(r.max)}, rgba(217,161,60,.16) ${pc(r.max)} 100%)`;
     return `<div class="rail s-${st}">
       <div class="rail-head"><span class="rail-name">${r.name}</span>
         <span class="status ${st}"><span class="dot"></span>${st === "OK" ? "ok" : st.toLowerCase()}</span></div>
       <div class="rail-bal">${fmtMoney(r.balance, r.currency)} <span class="rail-usd">≈ ${fmtUsd(usdOf(r))}</span></div>
-      <div class="bar">
+      <div class="situation ${st}">${situation}</div>
+      <div class="bar" style="background:${zones}">
         <div class="bar-fill" style="width:${pc(r.balance)}"></div>
-        <div class="mark" style="left:${pc(r.min)}" title="min"></div>
-        <div class="mark target" style="left:${pc(r.target)}" title="target"></div>
-        <div class="mark" style="left:${pc(r.max)}" title="max"></div>
+        <div class="mark" style="left:${pc(r.min)}" title="min ${fmtMoney(r.min, r.currency)}"></div>
+        <div class="mark target" style="left:${pc(r.target)}" title="target ${fmtMoney(r.target, r.currency)}"></div>
+        <div class="mark" style="left:${pc(r.max)}" title="max ${fmtMoney(r.max, r.currency)}"></div>
       </div>
-      <div class="bar-labels"><span>${fmtMoney(r.min, r.currency)}</span><span>target ${fmtMoney(r.target, r.currency)}</span><span>${fmtMoney(r.max, r.currency)}</span></div>
+      <div class="bar-labels"><span>min ${fmtMoney(r.min, r.currency)}</span><span style="color:var(--brand)">target ${fmtMoney(r.target, r.currency)}</span><span>max ${fmtMoney(r.max, r.currency)}</span></div>
       <div style="display:flex;justify-content:space-between;margin-top:8px;align-items:baseline">
         <span class="src-tag">balance: ${prov}</span>
         <span class="cfg-link" onclick="toggleCfg('${r.id}')">configure</span>
