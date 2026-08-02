@@ -11,7 +11,7 @@
     --brand: #F7931A; --ok: #34c07c; --danger: #e5646e; --warn: #d9a13c;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.55; font-size: 14px; }
+  body { background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.5; font-size: 13.5px; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
   header { border-bottom: 1px solid var(--border); padding: 20px 0 0; }
   header .top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; padding-bottom: 14px; }
@@ -33,7 +33,7 @@
   .stats .bad { color: var(--danger); }
   .stats .good { color: var(--ok); }
 
-  h2 { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin: 44px 0 12px; }
+  h2 { font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); margin: 44px 0 12px; }
 
   details.how { margin-top: 28px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
   details.how summary { cursor: pointer; padding: 12px 16px; font-size: 12.5px; color: var(--ink-2); list-style: none; }
@@ -54,9 +54,9 @@
   .status.OK { color: var(--ink-3); } .status.OK .dot { background: var(--ok); }
   .status.LOW { color: var(--danger); } .status.LOW .dot { background: var(--danger); }
   .status.EXCESS { color: var(--warn); } .status.EXCESS .dot { background: var(--warn); }
-  .rail-bal { font-size: 26px; font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 6px; }
-  .rail-usd { font-size: 13px; color: var(--ink-3); font-weight: 400; }
-  .situation { font-size: 12.5px; margin-top: 2px; color: var(--ink-2); }
+  .rail-bal { font-size: 24px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; margin-top: 6px; }
+  .rail-usd { font-size: 12px; color: var(--ink-3); font-weight: 400; letter-spacing: 0; }
+  .situation { font-size: 12px; margin-top: 1px; font-variant-numeric: tabular-nums; }
   .situation.LOW { color: var(--danger); }
   .situation.EXCESS { color: var(--warn); }
   .bar { position: relative; height: 8px; background: var(--border); border-radius: 99px; margin: 16px 0 6px; }
@@ -66,19 +66,24 @@
   .s-OK .bar-fill { background: var(--ok); opacity: .75; }
   .mark { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink-3); border-radius: 1px; }
   .mark.target { background: var(--brand); }
-  .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-  .src-tag { font-size: 11px; color: var(--ink-3); }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; opacity: .85; }
+  .src-tag { font-size: 10.5px; color: var(--ink-3); }
+
+  .p-data { text-align: right; margin-left: auto; }
+  .p-amt { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+  .p-facts { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; margin-top: 1px; }
+  .p-reason { font-size: 12px; color: var(--ink-3); max-width: 460px; margin-top: 3px; line-height: 1.45; }
 
   .report { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; display: grid; gap: 18px; }
-  .rep-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
-  .comp-bar { display: flex; gap: 2px; height: 18px; border-radius: 6px; overflow: hidden; }
+  .rep-label { font-size: 10.5px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 9px; }
+  .comp-bar { display: flex; gap: 2px; height: 14px; border-radius: 5px; overflow: hidden; }
   .seg { min-width: 3px; }
   .seg.c-usd { background: #8b93a0; } .seg.c-btc { background: var(--brand); } .seg.c-usdt { background: #5f8d7c; }
   .seg.g-0 { background: #848c98; } .seg.g-1 { background: #676d76; } .seg.g-2 { background: #4c5158; } .seg.g-3 { background: #35393f; }
-  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 8px; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-  .legend .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
-  .board { display: flex; gap: 8px; flex-wrap: wrap; }
-  .board .cell { display: flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 11px; font-size: 12px; color: var(--ink-2); background: var(--bg); }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .legend .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+  .board { display: flex; gap: 7px; flex-wrap: wrap; }
+  .board .cell { display: flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 7px; padding: 5px 10px; font-size: 11.5px; color: var(--ink-2); background: var(--bg); }
   .board .dot { width: 8px; height: 8px; border-radius: 50%; }
   .board .d-OK { background: var(--ok); } .board .d-LOW { background: var(--danger); } .board .d-EXCESS { background: var(--warn); }
   .board .st { font-size: 10.5px; letter-spacing: 0.05em; color: var(--ink-3); }
@@ -484,8 +489,14 @@ const fmtMoney = (v, cur) => {
   return (cur === "USD" ? "$" : "") + Number(v).toLocaleString("en-US", {maximumFractionDigits: 0}) + (cur === "USDT" ? " USDT" : "");
 };
 const fmtUsd = (v) => "$" + Number(v).toLocaleString("en-US", {maximumFractionDigits: 0});
-const SRC_LABEL = {demo: "simulated (demo)", bitcoin: "on-chain · mempool.space",
-  tron_trc20: "on-chain · TronGrid", manual: "manual entry"};
+const fmtShort = (v, cur) => {
+  const n = Number(v);
+  const s = n >= 1e6 ? (n / 1e6).toFixed(n % 1e6 ? 1 : 0) + "M"
+          : n >= 1e3 ? (n / 1e3).toFixed(n % 1e3 ? 0 : 0) + "K"
+          : n.toLocaleString("en-US", {maximumFractionDigits: 4});
+  return cur === "BTC" ? "₿" + s : cur === "USD" ? "$" + s : s;
+};
+const SRC_LABEL = {demo: "demo", bitcoin: "on-chain", tron_trc20: "on-chain", manual: "manual"};
 
 function render() {
   const statuses = evaluate(S.rails);
@@ -545,25 +556,25 @@ function render() {
     const type = (r.source || {}).type || "demo";
     const prov = si.ok
       ? `${SRC_LABEL[type] || type}${si.ts ? " · " + si.ts : ""}`
-      : `<span style="color:var(--danger)" title="${(si.error || "").replace(/"/g, "'")}">${SRC_LABEL[type] || type} · error</span>`;
+      : `<span style="color:var(--danger)" title="${(si.error || "").replace(/"/g, "'")}">error</span>`;
     const situation = st === "LOW"
-      ? `${fmtMoney(r.min - r.balance, r.currency)} below minimum — ${fmtMoney(r.target - r.balance, r.currency)} to reach target`
+      ? `<div class="situation LOW">${fmtShort(r.min - r.balance, r.currency)} under min · ${fmtShort(r.target - r.balance, r.currency)} to target</div>`
       : st === "EXCESS"
-      ? `${fmtMoney(r.balance - r.max, r.currency)} above maximum — overexposed to this counterparty`
-      : `within policy — at ${Math.round(r.balance / r.target * 100)}% of target`;
+      ? `<div class="situation EXCESS">${fmtShort(r.balance - r.max, r.currency)} over max</div>`
+      : "";
     const zones = `linear-gradient(90deg, rgba(229,100,110,.16) 0 ${pc(r.min)}, transparent ${pc(r.min)} ${pc(r.max)}, rgba(217,161,60,.16) ${pc(r.max)} 100%)`;
     return `<div class="rail s-${st}">
       <div class="rail-head"><span class="rail-name">${r.name}</span>
         <span class="status ${st}"><span class="dot"></span>${st === "OK" ? "ok" : st.toLowerCase()}</span></div>
-      <div class="rail-bal">${fmtMoney(r.balance, r.currency)} <span class="rail-usd">≈ ${fmtUsd(usdOf(r))}</span></div>
-      <div class="situation ${st}">${situation}</div>
+      <div class="rail-bal">${fmtMoney(r.balance, r.currency)} <span class="rail-usd">${fmtUsd(usdOf(r))}</span></div>
+      ${situation}
       <div class="bar" style="background:${zones}">
         <div class="bar-fill" style="width:${pc(r.balance)}"></div>
         <div class="mark" style="left:${pc(r.min)}" title="min ${fmtMoney(r.min, r.currency)}"></div>
         <div class="mark target" style="left:${pc(r.target)}" title="target ${fmtMoney(r.target, r.currency)}"></div>
         <div class="mark" style="left:${pc(r.max)}" title="max ${fmtMoney(r.max, r.currency)}"></div>
       </div>
-      <div class="bar-labels"><span>min ${fmtMoney(r.min, r.currency)}</span><span style="color:var(--brand)">target ${fmtMoney(r.target, r.currency)}</span><span>max ${fmtMoney(r.max, r.currency)}</span></div>
+      <div class="bar-labels"><span>${fmtShort(r.min, r.currency)}</span><span>◆ ${fmtShort(r.target, r.currency)}</span><span>${fmtShort(r.max, r.currency)}</span></div>
       <div style="display:flex;justify-content:space-between;margin-top:8px;align-items:baseline">
         <span class="src-tag">balance: ${prov}</span>
         <span class="cfg-link" onclick="toggleCfg('${r.id}')">configure</span>
@@ -579,8 +590,11 @@ function render() {
   $("#proposals").innerHTML = result.proposals.length ? result.proposals.map(p => `
     <div class="card"><div>
       <div class="route">${name(p.from)} <span class="arr">→</span> ${name(p.to)}</div>
-      <div class="detail">${p.reason}</div>
-      <div class="facts">${fmtMoney(p.amount, p.currency)} · ${p.method} · ETA ${p.eta} · fee ${p.fee ? "$" + p.fee : p.fee_native + " " + p.currency}</div>
+      <div class="p-reason">${p.reason}</div>
+    </div>
+    <div class="p-data">
+      <div class="p-amt">${fmtMoney(p.amount, p.currency)}</div>
+      <div class="p-facts">${p.method} · ${p.eta} · fee ${p.fee ? "$" + p.fee : p.fee_native + " " + p.currency}</div>
     </div>
     <div class="actions">
       <button class="btn approve" onclick="approveP('${p.id}', this)">Approve</button>
