@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Treasury Liquidity Monitor — Bitcoin Tickers</title>
+<style>
+  :root {
+    --bg: #0b0b0d; --surface: #131316; --border: #232329;
+    --ink: #f2f2f0; --ink-2: #a3a3ad; --ink-3: #6b6b76;
+    --brand: #F7931A; --ok: #34c07c; --danger: #e5646e; --warn: #d9a13c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.55; font-size: 14px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  header { border-bottom: 1px solid var(--border); padding: 20px 0 0; }
+  header .top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; padding-bottom: 14px; }
+  .logo { font-size: 18px; font-weight: 700; letter-spacing: 0.08em; }
+  .logo span { color: var(--brand); }
+  .tabs { display: flex; gap: 22px; }
+  .tabs a { color: var(--ink-3); text-decoration: none; font-size: 13px; padding-bottom: 10px; border-bottom: 2px solid transparent; }
+  .tabs a.active { color: var(--ink); border-bottom-color: var(--brand); }
+  .tabs a:hover { color: var(--ink-2); }
+  .controls { display: flex; gap: 8px; }
+  .controls button { background: none; border: 1px solid var(--border); color: var(--ink-2); border-radius: 6px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  .controls button:hover { color: var(--ink); border-color: var(--ink-3); }
+
+  .hero { padding: 40px 0 0; }
+  .kicker { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+  .price { font-size: 40px; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; margin: 2px 0 6px; }
+  .stats { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .stats .sep { color: var(--ink-3); margin: 0 8px; }
+  .stats .bad { color: var(--danger); }
+  .stats .good { color: var(--ok); }
+
+  h2 { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin: 44px 0 12px; }
+
+  details.how { margin-top: 28px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+  details.how summary { cursor: pointer; padding: 12px 16px; font-size: 12.5px; color: var(--ink-2); list-style: none; }
+  details.how summary::before { content: "▸ "; color: var(--ink-3); }
+  details.how[open] summary::before { content: "▾ "; }
+  details.how .body { padding: 0 16px 14px; font-size: 12.5px; color: var(--ink-2); max-width: 780px; }
+  details.how .body p { margin-bottom: 10px; }
+  details.how .body b { color: var(--ink); font-weight: 600; }
+  details.how .body .k { color: var(--ink); font-weight: 500; }
+  details.how a { color: var(--ink-2); }
+
+  .rails { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 10px; }
+  .rail { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .rail-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .rail-name { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  .status { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; white-space: nowrap; }
+  .status .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .status.OK { color: var(--ink-3); } .status.OK .dot { background: var(--ok); }
+  .status.LOW { color: var(--danger); } .status.LOW .dot { background: var(--danger); }
+  .status.EXCESS { color: var(--warn); } .status.EXCESS .dot { background: var(--warn); }
+  .rail-bal { font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .rail-usd { font-size: 12px; color: var(--ink-3); font-weight: 400; }
+  .bar { position: relative; height: 4px; background: var(--border); border-radius: 99px; margin: 14px 0 6px; }
+  .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; background: var(--ink-3); }
+  .s-LOW .bar-fill { background: var(--danger); }
+  .s-EXCESS .bar-fill { background: var(--warn); }
+  .mark { position: absolute; top: -3px; bottom: -3px; width: 1px; background: var(--ink-3); }
+  .mark.target { background: var(--brand); }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .src-tag { font-size: 10.5px; color: var(--ink-3); }
+  .cfg-link { font-size: 11px; color: var(--ink-3); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .cfg-link:hover { color: var(--ink-2); }
+  .cfg { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; display: grid; gap: 10px; }
+  .cfg .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .cfg label { font-size: 11px; color: var(--ink-3); min-width: 64px; }
+  .cfg select, .cfg input, .cfg textarea {
+    background: var(--bg); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 6px; padding: 5px 8px; font-size: 12px; flex: 1; min-width: 90px;
+    font-variant-numeric: tabular-nums;
+  }
+  .cfg textarea { width: 100%; min-height: 44px; font-family: ui-monospace, Menlo, monospace; }
+  .cfg .note { font-size: 11px; color: var(--ink-3); width: 100%; }
+
+  .cards { display: grid; gap: 8px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .route { font-size: 13.5px; font-weight: 500; }
+  .route .arr { color: var(--ink-3); }
+  .card .detail { font-size: 12.5px; color: var(--ink-2); max-width: 560px; margin-top: 2px; }
+  .card .facts { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .esc-note { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; color: var(--warn); }
+  .actions { display: flex; gap: 8px; }
+  .btn { border-radius: 6px; padding: 6px 14px; font-size: 12.5px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: none; color: var(--ink-2); }
+  .btn:hover { color: var(--ink); border-color: var(--ink-3); }
+  .btn.approve { color: var(--ok); border-color: rgba(52,192,124,0.4); }
+  .btn.approve:hover { border-color: var(--ok); }
+  .empty { color: var(--ink-3); font-size: 13px; padding: 8px 2px; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { padding: 8px 14px; text-align: left; white-space: nowrap; }
+  th { font-size: 10.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--border); }
+  td { border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  td:first-child { color: var(--ink-3); }
+  tr:last-child td { border-bottom: none; }
+
+  footer { border-top: 1px solid var(--border); padding: 18px 0 40px; font-size: 12px; color: var(--ink-3); margin-top: 56px; }
+  footer a { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo"><span>₿</span> BITCOIN TICKERS</div>
+      <div class="controls">
+        <button onclick="advanceDay()">Simulate next day</button>
+        <button onclick="refreshBalances()">Refresh balances</button>
+        <button onclick="if(confirm('Reset demo state? This clears your configuration and audit log.'))resetState()">Reset</button>
+      </div>
+    </div>
+    <nav class="tabs">
+      <a href="index.html">Markets</a>
+      <a class="active" href="treasury.html">Treasury Liquidity Monitor</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker">Total treasury liquidity</div>
+    <div class="price" id="total">—</div>
+    <div class="stats" id="stats"></div>
+
+    <details class="how">
+      <summary>How this works — balances, sources, risk logic</summary>
+      <div class="body">
+        <p><b>What this is.</b> A demo of an agentic treasury tool: the agent watches every rail
+        (bank accounts, exchange balances, wallets) against a liquidity policy, proposes rebalancing
+        transfers, and stops at the decision — you approve or reject. Everything runs in your
+        browser and is saved locally; it starts with simulated data so you can play immediately.</p>
+        <p><b>Where balances come from.</b> Each rail has a source, set under
+        <span class="k">configure</span>: <span class="k">simulated</span> (demo),
+        <span class="k">on-chain</span> (live public balances of watch addresses — BTC via
+        mempool.space, USDT TRC-20 via TronGrid; just paste addresses, no credentials), or
+        <span class="k">manual</span> (a number you maintain). Private exchange APIs (Kraken,
+        Binance) need credentials and are only supported in the
+        <a href="https://github.com/chfranc/liquidity-monitor">self-hosted version</a> — API keys
+        should never touch a public web page.</p>
+        <p><b>When is a rail at risk.</b> You set <span class="k">min</span> /
+        <span class="k">target</span> / <span class="k">max</span> per rail. Below min =
+        <span style="color:var(--danger)">low</span>: operations that depend on that rail can stall.
+        Above max = <span style="color:var(--warn)">excess</span>: overexposure to one counterparty.
+        The agent proposes transfers back to target through whitelisted corridors only, never
+        drawing a donor below its own target; what it can't solve within policy it escalates to
+        you. It never executes — approvals just record an instruction.</p>
+      </div>
+    </details>
+  </section>
+
+  <section><h2>Rails</h2><div class="rails" id="rails"></div></section>
+  <section><h2>Proposed rebalances</h2><div class="cards" id="proposals"></div></section>
+  <section><h2>Escalations</h2><div class="cards" id="escalations"></div></section>
+  <section><h2>Audit log</h2><div class="table-scroll"><table>
+    <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Detail</th></tr></thead>
+    <tbody id="audit"></tbody>
+  </table></div></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Demo — state lives in your browser. The tool proposes and records; it never moves funds.
+    Full version with exchange API sources: <a href="https://github.com/chfranc/liquidity-monitor">github.com/chfranc/liquidity-monitor</a>.
+  </div>
+</footer>
+
+<script>
+/* ---------- default config (same rails as the self-hosted demo) ---------- */
+const DEFAULT_RAILS = [
+  {id:"bank_usd", name:"Operating Bank (USD)", currency:"USD", min:250000, target:500000, max:1500000, balance:410000},
+  {id:"kraken_usd", name:"Kraken — USD", currency:"USD", min:100000, target:300000, max:800000, balance:965000},
+  {id:"kraken_btc", name:"Kraken — BTC", currency:"BTC", min:2, target:5, max:15, balance:6.8},
+  {id:"btc_hot", name:"Withdrawal Hot Wallet (BTC)", currency:"BTC", min:3, target:8, max:20, balance:2.1},
+  {id:"btc_cold", name:"Cold Storage (BTC)", currency:"BTC", min:50, target:100, max:1000, balance:118},
+  {id:"otc_btc", name:"OTC Settlement Wallet (BTC)", currency:"BTC", min:1, target:4, max:10, balance:0.6},
+  {id:"binance_usdt", name:"Binance — USDT", currency:"USDT", min:50000, target:150000, max:400000, balance:372000},
+  {id:"usdt_payout", name:"Payout Hot Wallet (USDT-TRC20)", currency:"USDT", min:40000, target:100000, max:250000, balance:18000},
+];
+const CORRIDORS = [
+  {from:"kraken_usd", to:"bank_usd", method:"Wire", fee:15, eta:"same day"},
+  {from:"bank_usd", to:"kraken_usd", method:"Wire", fee:15, eta:"same day"},
+  {from:"kraken_btc", to:"btc_hot", method:"On-chain BTC", fee_native:0.0001, eta:"~30 min"},
+  {from:"btc_hot", to:"kraken_btc", method:"On-chain BTC", fee_native:0.0001, eta:"~30 min"},
+  {from:"btc_cold", to:"btc_hot", method:"On-chain + signing ceremony", fee_native:0.0001, eta:"~2 h"},
+  {from:"btc_hot", to:"btc_cold", method:"On-chain sweep", fee_native:0.0001, eta:"~30 min"},
+  {from:"kraken_btc", to:"otc_btc", method:"On-chain BTC", fee_native:0.0001, eta:"~30 min"},
+  {from:"otc_btc", to:"kraken_btc", method:"On-chain BTC", fee_native:0.0001, eta:"~30 min"},
+  {from:"binance_usdt", to:"usdt_payout", method:"USDT TRC-20", fee_native:1, eta:"~5 min"},
+  {from:"usdt_payout", to:"binance_usdt", method:"USDT TRC-20", fee_native:1, eta:"~5 min"},
+];
+const DEMO_FLOWS = {btc_hot:[-3.5,1.5], otc_btc:[-2,3], usdt_payout:[-45000,5000],
+  binance_usdt:[-10000,40000], kraken_usd:[-90000,130000], kraken_btc:[-1.2,1.2], bank_usd:[-25000,-5000]};
+const USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
+
+/* ---------- engine (port of engine.py) ---------- */
+function evaluate(rails) {
+  const out = {};
+  for (const r of rails) out[r.id] = r.balance < r.min ? "LOW" : r.balance > r.max ? "EXCESS" : "OK";
+  return out;
+}
+function propose(rails) {
+  const byId = Object.fromEntries(rails.map(r => [r.id, r]));
+  const status = evaluate(rails);
+  const avail = Object.fromEntries(rails.map(r => [r.id, r.balance]));
+  const proposals = [], escalations = [];
+  for (const r of rails) {
+    if (status[r.id] !== "LOW") continue;
+    let need = r.target - avail[r.id];
+    const deficitPct = (r.min - r.balance) / r.min * 100;
+    for (const c of CORRIDORS.filter(c => c.to === r.id)) {
+      if (need <= 0) break;
+      const donor = byId[c.from];
+      if (!donor || donor.currency !== r.currency) continue;
+      const surplus = avail[donor.id] - donor.target;
+      if (surplus <= 0) continue;
+      let amt = Math.min(need, surplus, r.max - avail[r.id]);
+      amt = Math.round(amt * 1e8) / 1e8;
+      if (amt <= 0) continue;
+      proposals.push({id: Math.random().toString(36).slice(2, 10),
+        from: donor.id, to: r.id, amount: amt, currency: r.currency,
+        method: c.method, fee: c.fee || 0, fee_native: c.fee_native || 0, eta: c.eta,
+        reason: `${r.name} is ${deficitPct.toFixed(0)}% below its minimum; refill toward target from ${donor.name} surplus.`});
+      avail[donor.id] -= amt; avail[r.id] += amt; need -= amt;
+    }
+    if (need > 0 && avail[r.id] < r.min)
+      escalations.push({rail: r.id, reason: `${r.name} is below minimum and no allowed corridor has surplus ${r.currency} to cover it. Requires a decision: convert from another currency, draw cold storage, or accept the exposure.`});
+  }
+  for (const r of rails) {
+    if (status[r.id] !== "EXCESS") continue;
+    let excess = avail[r.id] - r.target;
+    for (const c of CORRIDORS.filter(c => c.from === r.id)) {
+      if (excess <= 0) break;
+      const recv = byId[c.to];
+      if (!recv || recv.currency !== r.currency) continue;
+      const headroom = recv.max - avail[recv.id];
+      if (headroom <= 0) continue;
+      let amt = Math.round(Math.min(excess, headroom) * 1e8) / 1e8;
+      proposals.push({id: Math.random().toString(36).slice(2, 10),
+        from: r.id, to: recv.id, amount: amt, currency: r.currency,
+        method: c.method, fee: c.fee || 0, fee_native: c.fee_native || 0, eta: c.eta,
+        reason: `${r.name} exceeds its maximum (counterparty/concentration limit); move surplus toward ${recv.name}.`});
+      avail[r.id] -= amt; avail[recv.id] += amt; excess -= amt;
+    }
+    if (excess > 0 && avail[r.id] > r.max)
+      escalations.push({rail: r.id, reason: `${r.name} remains above maximum and no receiver has headroom. Requires a decision.`});
+  }
+  return {proposals, escalations};
+}
+function applyTransfer(rails, p) {
+  const byId = Object.fromEntries(rails.map(r => [r.id, r]));
+  byId[p.from].balance = Math.round((byId[p.from].balance - p.amount - (p.fee || 0)) * 1e8) / 1e8;
+  byId[p.to].balance = Math.round((byId[p.to].balance + p.amount - (p.fee_native || 0)) * 1e8) / 1e8;
+}
+
+/* ---------- state (localStorage) ---------- */
+const KEY = "lm-state-v1";
+let S = null, btcPrice = null, result = {proposals: [], escalations: []}, srcInfo = {};
+function seed() { return {rails: JSON.parse(JSON.stringify(DEFAULT_RAILS)), day: 0, audit: []}; }
+function loadState() { try { S = JSON.parse(localStorage.getItem(KEY)) || seed(); } catch { S = seed(); } }
+function saveState() { localStorage.setItem(KEY, JSON.stringify(S)); }
+function audit(actor, action, detail) {
+  S.audit.unshift({ts: new Date().toISOString().slice(0, 19).replace("T", " "), actor, action, detail});
+  S.audit = S.audit.slice(0, 100);
+  saveState();
+}
+
+/* ---------- balance sources (browser-safe only) ---------- */
+async function fetchRailBalance(r) {
+  const src = r.source;
+  if (!src || src.type === "demo") return {mode: "demo", ok: true};
+  try {
+    if (src.type === "bitcoin") {
+      let total = 0;
+      for (const a of src.addresses) {
+        const d = await (await fetch(`https://mempool.space/api/address/${a}`)).json();
+        total += (d.chain_stats.funded_txo_sum - d.chain_stats.spent_txo_sum) / 1e8;
+      }
+      r.balance = Math.round(total * 1e8) / 1e8;
+      return {mode: "live", ok: true, ts: new Date().toTimeString().slice(0, 5)};
+    }
+    if (src.type === "tron_trc20") {
+      const d = await (await fetch(`https://api.trongrid.io/v1/accounts/${src.address}`)).json();
+      if (!d.data || !d.data.length) throw new Error("address not found on Tron");
+      const tok = (d.data[0].trc20 || []).find(t => USDT_CONTRACT in t);
+      r.balance = tok ? Number(tok[USDT_CONTRACT]) / 1e6 : 0;
+      return {mode: "live", ok: true, ts: new Date().toTimeString().slice(0, 5)};
+    }
+    if (src.type === "manual") {
+      if (src.balance == null) throw new Error("no balance entered yet — use configure");
+      r.balance = Number(src.balance);
+      return {mode: "manual", ok: true};
+    }
+    throw new Error("unknown source");
+  } catch (e) { return {mode: "live", ok: false, error: e.message}; }
+}
+async function refreshBalances() {
+  for (const r of S.rails) srcInfo[r.id] = await fetchRailBalance(r);
+  const live = S.rails.filter(r => r.source && r.source.type !== "demo" && srcInfo[r.id].ok).map(r => r.id);
+  if (live.length) audit("agent", "refresh", "balances pulled: " + live.join(", "));
+  Object.entries(srcInfo).filter(([, i]) => !i.ok).forEach(([id, i]) => audit("agent", "error", `source failed — ${id}: ${i.error}`));
+  rescan();
+}
+function rescan() {
+  result = propose(S.rails);
+  audit("agent", "scan", `${result.proposals.length} proposals, ${result.escalations.length} escalations`);
+  render();
+}
+
+/* ---------- actions ---------- */
+function advanceDay() {
+  S.day += 1;
+  const applied = {};
+  for (const r of S.rails) {
+    if (r.source && r.source.type !== "demo") continue;
+    const f = DEMO_FLOWS[r.id]; if (!f) continue;
+    const delta = f[0] + Math.random() * (f[1] - f[0]);
+    r.balance = Math.round(Math.max(0, r.balance + delta) * 1e8) / 1e8;
+    applied[r.id] = Math.round(delta * 100) / 100;
+  }
+  audit("system", "day", `Day +${S.day}: simulated flows ${JSON.stringify(applied)}`);
+  saveState();
+  rescan();
+}
+function approveP(id, btn) {
+  const p = result.proposals.find(x => x.id === id); if (!p) return;
+  if (!confirm(`Approve transfer?\n\n${fmtMoney(p.amount, p.currency)}  ${p.from} → ${p.to}\nvia ${p.method}, ETA ${p.eta}\n\nAn execution instruction will be recorded.`)) return;
+  btn.disabled = true;
+  applyTransfer(S.rails, p);
+  audit("human", "approve", `${p.amount} ${p.currency} ${p.from} -> ${p.to} via ${p.method} (simulated settlement)`);
+  saveState();
+  rescan();
+}
+function rejectP(id) {
+  const p = result.proposals.find(x => x.id === id); if (!p) return;
+  result.proposals = result.proposals.filter(x => x.id !== id);
+  audit("human", "reject", `${p.amount} ${p.currency} ${p.from} -> ${p.to}`);
+  render();
+}
+function resetState() { localStorage.removeItem(KEY); loadState(); saveState(); srcInfo = {}; refreshBalances(); }
+
+/* ---------- configure panel ---------- */
+function toggleCfg(id) {
+  const box = document.getElementById("cfg-" + id);
+  if (box.style.display !== "none") { box.style.display = "none"; return; }
+  const r = S.rails.find(x => x.id === id);
+  const type = (r.source || {}).type || "demo";
+  box.innerHTML = `
+    <div class="row"><label>source</label>
+      <select id="type-${id}" onchange="srcFields('${id}')">
+        ${[["demo","simulated (demo)"],["bitcoin","on-chain BTC (watch addresses)"],
+           ["tron_trc20","USDT TRC-20 (watch address)"],["manual","manual entry"],
+           ["exchange","exchange API — self-hosted only"]].map(([t, l]) =>
+          `<option value="${t}" ${t===type?"selected":""} ${t==="exchange"?"disabled":""}>${l}</option>`).join("")}
+      </select></div>
+    <div id="srcfields-${id}"></div>
+    <div class="row"><button class="btn" onclick="saveSource('${id}')">Save source</button></div>
+    <div class="row" style="border-top:1px solid var(--border);padding-top:10px">
+      <label>policy</label>
+      <input id="min-${id}" type="number" step="any" value="${r.min}" title="min">
+      <input id="target-${id}" type="number" step="any" value="${r.target}" title="target">
+      <input id="max-${id}" type="number" step="any" value="${r.max}" title="max">
+      <button class="btn" onclick="savePolicy('${id}')">Save policy</button>
+    </div>
+    <div class="note">policy: min · target · max, in ${r.currency}. Below min = low; above max = excess. Exchange API sources (private keys) live in the <a href="https://github.com/chfranc/liquidity-monitor" style="color:var(--ink-2)">self-hosted version</a>.</div>`;
+  box.style.display = "grid";
+  srcFields(id);
+}
+function srcFields(id) {
+  const type = document.getElementById("type-" + id).value;
+  const r = S.rails.find(x => x.id === id);
+  const src = (r.source && r.source.type === type) ? r.source : {};
+  let html = "";
+  if (type === "bitcoin")
+    html = `<div class="row"><label>addresses</label>
+      <textarea id="addrs-${id}" placeholder="one BTC address per line — public watch addresses, no credentials">${(src.addresses || []).join("\n")}</textarea></div>`;
+  if (type === "tron_trc20")
+    html = `<div class="row"><label>address</label>
+      <input id="addr-${id}" placeholder="T... wallet address (public, read-only)" value="${src.address || ""}"></div>`;
+  if (type === "manual")
+    html = `<div class="row"><label>balance</label>
+      <input id="manual-${id}" type="number" step="any" value="${src.balance ?? ""}" placeholder="current balance in ${r.currency}"></div>
+      <div class="note">you maintain this number (e.g. from bank statements); it is saved in your browser.</div>`;
+  document.getElementById("srcfields-" + id).innerHTML = html;
+}
+async function saveSource(id) {
+  const type = document.getElementById("type-" + id).value;
+  const r = S.rails.find(x => x.id === id);
+  if (type === "demo") delete r.source;
+  if (type === "bitcoin") {
+    const addresses = document.getElementById("addrs-" + id).value.split("\n").map(x => x.trim()).filter(Boolean);
+    if (!addresses.length) return alert("enter at least one address");
+    r.source = {type, addresses};
+  }
+  if (type === "tron_trc20") {
+    const address = document.getElementById("addr-" + id).value.trim();
+    if (!address) return alert("enter an address");
+    r.source = {type, address};
+  }
+  if (type === "manual") {
+    const v = document.getElementById("manual-" + id).value;
+    if (v === "") return alert("enter a balance");
+    r.source = {type, balance: Number(v)};
+  }
+  audit("human", "config", `balance source for ${id} -> ${type}`);
+  saveState();
+  srcInfo[id] = await fetchRailBalance(r);
+  saveState();
+  rescan();
+}
+function savePolicy(id) {
+  const r = S.rails.find(x => x.id === id);
+  const vals = ["min", "target", "max"].map(k => Number(document.getElementById(k + "-" + id).value));
+  if (!(0 <= vals[0] && vals[0] <= vals[1] && vals[1] <= vals[2])) return alert("must satisfy 0 ≤ min ≤ target ≤ max");
+  [r.min, r.target, r.max] = vals;
+  audit("human", "config", `policy for ${id} -> min ${vals[0]} / target ${vals[1]} / max ${vals[2]}`);
+  saveState();
+  rescan();
+}
+
+/* ---------- render ---------- */
+const $ = (s) => document.querySelector(s);
+const fmtMoney = (v, cur) => {
+  if (cur === "BTC") return "₿" + Number(v).toLocaleString("en-US", {maximumFractionDigits: 4});
+  return (cur === "USD" ? "$" : "") + Number(v).toLocaleString("en-US", {maximumFractionDigits: 0}) + (cur === "USDT" ? " USDT" : "");
+};
+const fmtUsd = (v) => "$" + Number(v).toLocaleString("en-US", {maximumFractionDigits: 0});
+const SRC_LABEL = {demo: "simulated (demo)", bitcoin: "on-chain · mempool.space",
+  tron_trc20: "on-chain · TronGrid", manual: "manual entry"};
+
+function render() {
+  const statuses = evaluate(S.rails);
+  const usdOf = (r) => r.currency === "BTC" ? r.balance * (btcPrice || 0) : r.balance;
+  const total = S.rails.reduce((a, r) => a + usdOf(r), 0);
+  const nLow = Object.values(statuses).filter(x => x === "LOW").length;
+  const nExc = Object.values(statuses).filter(x => x === "EXCESS").length;
+  const nDec = result.proposals.length + result.escalations.length;
+  const sep = `<span class="sep">·</span>`;
+
+  $("#total").textContent = fmtUsd(total);
+  $("#stats").innerHTML =
+    (btcPrice ? `₿${(total / btcPrice).toLocaleString("en-US", {maximumFractionDigits: 2})}` + sep : "") +
+    ((nLow + nExc) ? `<span class="bad">${nLow + nExc} rail${nLow + nExc === 1 ? "" : "s"} in breach</span>` : `<span class="good">all rails within policy</span>`) + sep +
+    `${nDec} pending decision${nDec === 1 ? "" : "s"}` + sep +
+    `day ${S.day}` + (btcPrice ? sep + `BTC ${fmtUsd(btcPrice)}` : "");
+
+  $("#rails").innerHTML = S.rails.map(r => {
+    const st = statuses[r.id];
+    const scale = r.max * 1.05;
+    const pc = (v) => Math.min(100, v / scale * 100).toFixed(1) + "%";
+    const si = srcInfo[r.id] || {mode: (r.source || {}).type ? "live" : "demo", ok: true};
+    const type = (r.source || {}).type || "demo";
+    const prov = si.ok
+      ? `${SRC_LABEL[type] || type}${si.ts ? " · " + si.ts : ""}`
+      : `<span style="color:var(--danger)" title="${(si.error || "").replace(/"/g, "'")}">${SRC_LABEL[type] || type} · error</span>`;
+    return `<div class="rail s-${st}">
+      <div class="rail-head"><span class="rail-name">${r.name}</span>
+        <span class="status ${st}"><span class="dot"></span>${st === "OK" ? "ok" : st.toLowerCase()}</span></div>
+      <div class="rail-bal">${fmtMoney(r.balance, r.currency)} <span class="rail-usd">≈ ${fmtUsd(usdOf(r))}</span></div>
+      <div class="bar">
+        <div class="bar-fill" style="width:${pc(r.balance)}"></div>
+        <div class="mark" style="left:${pc(r.min)}" title="min"></div>
+        <div class="mark target" style="left:${pc(r.target)}" title="target"></div>
+        <div class="mark" style="left:${pc(r.max)}" title="max"></div>
+      </div>
+      <div class="bar-labels"><span>${fmtMoney(r.min, r.currency)}</span><span>target ${fmtMoney(r.target, r.currency)}</span><span>${fmtMoney(r.max, r.currency)}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;align-items:baseline">
+        <span class="src-tag">balance: ${prov}</span>
+        <span class="cfg-link" onclick="toggleCfg('${r.id}')">configure</span>
+      </div>
+      <div class="cfg" id="cfg-${r.id}" style="display:none"></div>
+    </div>`;
+  }).join("");
+
+  const name = (id) => S.rails.find(r => r.id === id).name;
+  $("#proposals").innerHTML = result.proposals.length ? result.proposals.map(p => `
+    <div class="card"><div>
+      <div class="route">${name(p.from)} <span class="arr">→</span> ${name(p.to)}</div>
+      <div class="detail">${p.reason}</div>
+      <div class="facts">${fmtMoney(p.amount, p.currency)} · ${p.method} · ETA ${p.eta} · fee ${p.fee ? "$" + p.fee : p.fee_native + " " + p.currency}</div>
+    </div>
+    <div class="actions">
+      <button class="btn approve" onclick="approveP('${p.id}', this)">Approve</button>
+      <button class="btn" onclick="rejectP('${p.id}')">Reject</button>
+    </div></div>`).join("") : `<div class="empty">Nothing pending — all rails within policy.</div>`;
+
+  $("#escalations").innerHTML = result.escalations.length ? result.escalations.map(e => `
+    <div class="card"><div>
+      <div class="route">${name(e.rail)} <span class="esc-note">· needs a decision</span></div>
+      <div class="detail">${e.reason}</div>
+    </div></div>`).join("") : `<div class="empty">No escalations.</div>`;
+
+  $("#audit").innerHTML = S.audit.map(a => `<tr>
+    <td>${a.ts}</td><td>${a.actor}</td><td>${a.action}</td><td>${a.detail}</td></tr>`).join("")
+    || `<tr><td class="empty" colspan="4">—</td></tr>`;
+}
+
+/* ---------- boot ---------- */
+loadState();
+fetch("https://api.kraken.com/0/public/Ticker?pair=XBTUSD")
+  .then(r => r.json())
+  .then(k => { btcPrice = +Object.values(k.result)[0].c[0]; render(); })
+  .catch(() => {});
+refreshBalances();
+</script>
+</body>
+</html>

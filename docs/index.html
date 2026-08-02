@@ -26,9 +26,13 @@
   .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
   header {
     border-bottom: 1px solid var(--border);
-    padding: 20px 0;
+    padding: 20px 0 0;
   }
-  header .wrap { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; }
+  header .top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; padding-bottom: 14px; }
+  .tabs { display: flex; gap: 22px; }
+  .tabs a { color: var(--ink-3); text-decoration: none; font-size: 13px; padding-bottom: 10px; border-bottom: 2px solid transparent; }
+  .tabs a.active { color: var(--ink); border-bottom-color: var(--orange); }
+  .tabs a:hover { color: var(--ink-2); }
   .logo { font-size: 18px; font-weight: 700; letter-spacing: 0.08em; }
   .logo span { color: var(--orange); }
   .updated { font-size: 12px; color: var(--ink-3); }
@@ -99,8 +103,14 @@
 <body>
 <header>
   <div class="wrap">
-    <div class="logo"><span>₿</span> BITCOIN TICKERS</div>
-    <div class="updated" id="updated"></div>
+    <div class="top">
+      <div class="logo"><span>₿</span> BITCOIN TICKERS</div>
+      <div class="updated" id="updated"></div>
+    </div>
+    <nav class="tabs">
+      <a class="active" href="index.html">Markets</a>
+      <a href="treasury.html">Treasury Liquidity Monitor</a>
+    </nav>
   </div>
 </header>
 
