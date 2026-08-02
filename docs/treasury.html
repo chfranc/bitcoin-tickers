@@ -69,6 +69,22 @@
   .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
   .src-tag { font-size: 11px; color: var(--ink-3); }
 
+  .report { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; display: grid; gap: 18px; }
+  .rep-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  .comp-bar { display: flex; gap: 2px; height: 18px; border-radius: 6px; overflow: hidden; }
+  .seg { min-width: 3px; }
+  .seg.c-usd { background: #8b93a0; } .seg.c-btc { background: var(--brand); } .seg.c-usdt { background: #5f8d7c; }
+  .seg.g-0 { background: #848c98; } .seg.g-1 { background: #676d76; } .seg.g-2 { background: #4c5158; } .seg.g-3 { background: #35393f; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 8px; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .legend .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+  .board { display: flex; gap: 8px; flex-wrap: wrap; }
+  .board .cell { display: flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 11px; font-size: 12px; color: var(--ink-2); background: var(--bg); }
+  .board .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .board .d-OK { background: var(--ok); } .board .d-LOW { background: var(--danger); } .board .d-EXCESS { background: var(--warn); }
+  .board .st { font-size: 10.5px; letter-spacing: 0.05em; color: var(--ink-3); }
+  .group-h { display: flex; justify-content: space-between; align-items: baseline; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); margin: 30px 0 10px; font-variant-numeric: tabular-nums; }
+  .group-h:first-child { margin-top: 0; }
+
   .selfhost { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; font-size: 13px; color: var(--ink-2); }
   .selfhost p { margin-bottom: 10px; max-width: 780px; }
   .selfhost b { color: var(--ink); font-weight: 600; }
@@ -164,7 +180,8 @@
     </details>
   </section>
 
-  <section><h2>Rails</h2><div class="rails" id="rails"></div></section>
+  <section><h2>Status report</h2><div class="report" id="report"></div></section>
+  <section id="rails"></section>
   <section><h2>Proposed rebalances</h2><div class="cards" id="proposals"></div></section>
   <section><h2>Escalations</h2><div class="cards" id="escalations"></div></section>
 
@@ -201,15 +218,16 @@ python3 app.py   <span class="c"># → http://localhost:8641</span></pre>
 
 <script>
 /* ---------- default config (same rails as the self-hosted demo) ---------- */
+const GROUP_ORDER = ["Fiat — Banking", "Exchanges", "Wallets — On-chain", "OTC Desk"];
 const DEFAULT_RAILS = [
-  {id:"bank_usd", name:"Operating Bank (USD)", currency:"USD", min:250000, target:500000, max:1500000, balance:410000},
-  {id:"kraken_usd", name:"Kraken — USD", currency:"USD", min:100000, target:300000, max:800000, balance:965000},
-  {id:"kraken_btc", name:"Kraken — BTC", currency:"BTC", min:2, target:5, max:15, balance:6.8},
-  {id:"btc_hot", name:"Withdrawal Hot Wallet (BTC)", currency:"BTC", min:3, target:8, max:20, balance:2.1},
-  {id:"btc_cold", name:"Cold Storage (BTC)", currency:"BTC", min:50, target:100, max:1000, balance:118},
-  {id:"otc_btc", name:"OTC Settlement Wallet (BTC)", currency:"BTC", min:1, target:4, max:10, balance:0.6},
-  {id:"binance_usdt", name:"Binance — USDT", currency:"USDT", min:50000, target:150000, max:400000, balance:372000},
-  {id:"usdt_payout", name:"Payout Hot Wallet (USDT-TRC20)", currency:"USDT", min:40000, target:100000, max:250000, balance:18000},
+  {id:"bank_usd", name:"Operating Bank (USD)", group:"Fiat — Banking", currency:"USD", min:250000, target:500000, max:1500000, balance:410000},
+  {id:"kraken_usd", name:"Kraken — USD", group:"Exchanges", currency:"USD", min:100000, target:300000, max:800000, balance:965000},
+  {id:"kraken_btc", name:"Kraken — BTC", group:"Exchanges", currency:"BTC", min:2, target:5, max:15, balance:6.8},
+  {id:"binance_usdt", name:"Binance — USDT", group:"Exchanges", currency:"USDT", min:50000, target:150000, max:400000, balance:372000},
+  {id:"btc_hot", name:"Withdrawal Hot Wallet (BTC)", group:"Wallets — On-chain", currency:"BTC", min:3, target:8, max:20, balance:2.1},
+  {id:"btc_cold", name:"Cold Storage (BTC)", group:"Wallets — On-chain", currency:"BTC", min:50, target:100, max:1000, balance:118},
+  {id:"usdt_payout", name:"Payout Hot Wallet (USDT-TRC20)", group:"Wallets — On-chain", currency:"USDT", min:40000, target:100000, max:250000, balance:18000},
+  {id:"otc_btc", name:"OTC Settlement Wallet (BTC)", group:"OTC Desk", currency:"BTC", min:1, target:4, max:10, balance:0.6},
 ];
 const CORRIDORS = [
   {from:"kraken_usd", to:"bank_usd", method:"Wire", fee:15, eta:"same day"},
@@ -291,7 +309,14 @@ function applyTransfer(rails, p) {
 const KEY = "lm-state-v1";
 let S = null, btcPrice = null, result = {proposals: [], escalations: []}, srcInfo = {};
 function seed() { return {rails: JSON.parse(JSON.stringify(DEFAULT_RAILS)), day: 0, audit: []}; }
-function loadState() { try { S = JSON.parse(localStorage.getItem(KEY)) || seed(); } catch { S = seed(); } }
+function loadState() {
+  try { S = JSON.parse(localStorage.getItem(KEY)) || seed(); } catch { S = seed(); }
+  // migrate states saved before rails had groups/order
+  const def = Object.fromEntries(DEFAULT_RAILS.map(r => [r.id, r]));
+  for (const r of S.rails) r.group = r.group || (def[r.id] || {}).group || "Other";
+  const pos = Object.fromEntries(DEFAULT_RAILS.map((r, i) => [r.id, i]));
+  S.rails.sort((a, b) => (pos[a.id] ?? 99) - (pos[b.id] ?? 99));
+}
 function saveState() { localStorage.setItem(KEY, JSON.stringify(S)); }
 function audit(actor, action, detail) {
   S.audit.unshift({ts: new Date().toISOString().slice(0, 19).replace("T", " "), actor, action, detail});
@@ -478,7 +503,41 @@ function render() {
     `${nDec} pending decision${nDec === 1 ? "" : "s"}` + sep +
     `day ${S.day}` + (btcPrice ? sep + `BTC ${fmtUsd(btcPrice)}` : "");
 
-  $("#rails").innerHTML = S.rails.map(r => {
+  /* ---- status report: composition bars + policy board ---- */
+  const CUR_META = {USD: ["c-usd", "#8b93a0"], BTC: ["c-btc", "#F7931A"], USDT: ["c-usdt", "#5f8d7c"]};
+  const byCur = {};
+  for (const r of S.rails) byCur[r.currency] = (byCur[r.currency] || 0) + usdOf(r);
+  const byGroup = {};
+  for (const r of S.rails) byGroup[r.group] = (byGroup[r.group] || 0) + usdOf(r);
+  const groups = GROUP_ORDER.filter(g => byGroup[g]).concat(Object.keys(byGroup).filter(g => !GROUP_ORDER.includes(g)));
+  const pctOf = (v) => total ? (v / total * 100) : 0;
+  const G_SW = ["#848c98", "#676d76", "#4c5158", "#35393f"];
+
+  $("#report").innerHTML = `
+    <div>
+      <div class="rep-label">Liquidity by currency</div>
+      <div class="comp-bar">${Object.entries(byCur).map(([c, v]) =>
+        `<div class="seg ${CUR_META[c][0]}" style="width:${pctOf(v)}%" title="${c} ${fmtUsd(v)}"></div>`).join("")}</div>
+      <div class="legend">${Object.entries(byCur).map(([c, v]) =>
+        `<span><span class="sw" style="background:${CUR_META[c][1]}"></span>${c} ${fmtUsd(v)} · ${pctOf(v).toFixed(0)}%</span>`).join("")}</div>
+    </div>
+    <div>
+      <div class="rep-label">Liquidity by purpose</div>
+      <div class="comp-bar">${groups.map((g, i) =>
+        `<div class="seg" style="width:${pctOf(byGroup[g])}%;background:${G_SW[i % 4]}" title="${g} ${fmtUsd(byGroup[g])}"></div>`).join("")}</div>
+      <div class="legend">${groups.map((g, i) =>
+        `<span><span class="sw" style="background:${G_SW[i % 4]}"></span>${g} ${fmtUsd(byGroup[g])} · ${pctOf(byGroup[g]).toFixed(0)}%</span>`).join("")}</div>
+    </div>
+    <div>
+      <div class="rep-label">Policy status — ${nLow + nExc ? `${nLow} low · ${nExc} excess · ${S.rails.length - nLow - nExc} ok` : "all " + S.rails.length + " rails ok"}</div>
+      <div class="board">${S.rails.map(r => {
+        const st = statuses[r.id];
+        return `<span class="cell"><span class="dot d-${st}"></span>${r.name.replace(/ \(.*\)/, "")} <span class="st">${st === "OK" ? "ok" : st.toLowerCase()}</span></span>`;
+      }).join("")}</div>
+    </div>`;
+
+  /* ---- rails grouped by purpose ---- */
+  const railCard = (r) => {
     const st = statuses[r.id];
     const scale = r.max * 1.05;
     const pc = (v) => Math.min(100, v / scale * 100).toFixed(1) + "%";
@@ -511,7 +570,10 @@ function render() {
       </div>
       <div class="cfg" id="cfg-${r.id}" style="display:none"></div>
     </div>`;
-  }).join("");
+  };
+  $("#rails").innerHTML = groups.map(g => `
+    <div class="group-h"><span>${g}</span><span>${fmtUsd(byGroup[g])}</span></div>
+    <div class="rails">${S.rails.filter(r => r.group === g).map(railCard).join("")}</div>`).join("");
 
   const name = (id) => S.rails.find(r => r.id === id).name;
   $("#proposals").innerHTML = result.proposals.length ? result.proposals.map(p => `
